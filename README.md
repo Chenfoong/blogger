@@ -248,76 +248,62 @@
         </footer>
 
 <script>
-  const toggleMode = document.getElementById('toggleMode');
-  const toggleLang = document.getElementById('toggleLang');
-  const zoomIn = document.getElementById('zoomIn');
-  const zoomOut = document.getElementById('zoomOut');
-  const videoCover = document.getElementById('videoCover');
-  const amitabhaVideo = document.getElementById('amitabhaVideo');
-  const sutraDiv = document.getElementById('sutra');
-  const mainTitle = document.getElementById('mainTitle');
-  const videoText = document.getElementById('videoText');
+  // 初始设置
+  const toggleLangBtn = document.getElementById("toggleLang");
+  const toggleModeBtn = document.getElementById("toggleMode");
+  const zoomInBtn = document.getElementById("zoomIn");
+  const zoomOutBtn = document.getElementById("zoomOut");
+  const body = document.body;
+  const sutraDiv = document.getElementById("sutra");
+  const video = document.getElementById("amitabhaVideo");
+  const videoCover = document.getElementById("videoCover");
+  const videoText = document.getElementById("videoText");
+  const mainTitle = document.getElementById("mainTitle");
 
-  let currentLang = localStorage.getItem('prefLang') || 'simplified';
-  let isLight = localStorage.getItem('prefTheme') === 'light';
-  let savedFont = localStorage.getItem('prefFontSize');
+  let isTraditional = false;
+  let currentZoom = 1;
 
-  const converter = OpenCC.Converter({ from: 'cn', to: 'tw' });
-  const converterBack = OpenCC.Converter({ from: 'tw', to: 'cn' });
+  // 简繁切换
+  toggleLangBtn.addEventListener("click", () => {
+    const converter = isTraditional
+      ? OpenCC.Converter({ from: "tw", to: "cn" })
+      : OpenCC.Converter({ from: "cn", to: "tw" });
 
-  // Apply stored preferences
-  if (isLight) document.body.classList.add('light');
-  toggleMode.textContent = isLight ? '暗' : '亮';
+    sutraDiv.innerHTML = converter(sutraDiv.innerHTML);
+    mainTitle.textContent = isTraditional
+      ? mainTitle.dataset.simplified
+      : mainTitle.dataset.traditional;
+    videoText.textContent = isTraditional
+      ? videoText.dataset.simplified
+      : videoText.dataset.traditional;
 
-  if (savedFont) sutraDiv.style.fontSize = savedFont;
-
-  // apply language preference
-  const applyLanguage = () => {
-    if (currentLang === 'traditional') {
-      sutraDiv.innerHTML = converter(sutraDiv.innerHTML);
-      mainTitle.textContent = mainTitle.getAttribute('data-traditional');
-      videoText.textContent = videoText.getAttribute('data-traditional');
-      toggleLang.textContent = '简';
-    } else {
-      sutraDiv.innerHTML = converterBack(sutraDiv.innerHTML);
-      mainTitle.textContent = mainTitle.getAttribute('data-simplified');
-      videoText.textContent = videoText.getAttribute('data-simplified');
-      toggleLang.textContent = '繁';
-    }
-  };
-  applyLanguage();
-
-  toggleMode.addEventListener('click', () => {
-    document.body.classList.toggle('light');
-    const light = document.body.classList.contains('light');
-    toggleMode.textContent = light ? '暗' : '亮';
-    localStorage.setItem('prefTheme', light ? 'light' : 'dark');
+    isTraditional = !isTraditional;
+    toggleLangBtn.textContent = isTraditional ? "简" : "繁";
   });
 
-  zoomIn.addEventListener('click', () => {
-    const newSize = (parseFloat(getComputedStyle(sutraDiv).fontSize) + 1) + 'px';
-    sutraDiv.style.fontSize = newSize;
-    localStorage.setItem('prefFontSize', newSize);
+  // 亮暗模式切换
+  toggleModeBtn.addEventListener("click", () => {
+    body.classList.toggle("light");
+    toggleModeBtn.textContent = body.classList.contains("light") ? "暗" : "亮";
   });
 
-  zoomOut.addEventListener('click', () => {
-    const newSize = (parseFloat(getComputedStyle(sutraDiv).fontSize) - 1) + 'px';
-    sutraDiv.style.fontSize = newSize;
-    localStorage.setItem('prefFontSize', newSize);
+  // 字体放大
+  zoomInBtn.addEventListener("click", () => {
+    currentZoom += 0.1;
+    sutraDiv.style.fontSize = `${currentZoom}em`;
   });
 
-  videoCover.addEventListener('click', () => {
-    videoCover.style.display = 'none';
-    amitabhaVideo.style.display = 'block';
-    amitabhaVideo.play();
+  // 字体缩小
+  zoomOutBtn.addEventListener("click", () => {
+    currentZoom = Math.max(0.6, currentZoom - 0.1);
+    sutraDiv.style.fontSize = `${currentZoom}em`;
   });
 
-  toggleLang.addEventListener('click', () => {
-    currentLang = currentLang === 'simplified' ? 'traditional' : 'simplified';
-    localStorage.setItem('prefLang', currentLang);
-    applyLanguage();
+  // 视频封面点击播放
+  videoCover.addEventListener("click", () => {
+    videoCover.style.display = "none";
+    video.style.display = "block";
+    video.play();
   });
 </script>
 
-</body>
-</html>
